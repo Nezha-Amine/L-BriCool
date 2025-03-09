@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'signin.dart';
+import 'package:lbrikol/after_auth/welcome_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -31,7 +32,7 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 25),
+              const SizedBox(height: 30),
               const Text(
                 "Create an Account",
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -112,12 +113,13 @@ class _RegisterPageState extends State<RegisterPage> {
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   onPressed: () {
-                    // Navigator.pushReplacement(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => const RegisterPage(),
-                    //   ),
-                    // );
+                    // We need to make the signup logic here before redirecting
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const WelcomePage(),
+                      ),
+                    );
                   },
                   child: const Text("SIGN UP",
                       style: TextStyle(fontSize: 18, color: Colors.white)),

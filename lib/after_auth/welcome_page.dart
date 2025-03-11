@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lbrikol/client_form/basic_info_client.dart';
 import 'package:lbrikol/student_form/basic_info_student.dart';
 
+// Stateful widget representing the welcome page
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
 
@@ -10,19 +11,21 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
+  // Boolean to track selection between student and client
   bool isStudentSelected = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // App bar with title and styling
       appBar: AppBar(
         title: const Text(
-          'Welcome to LbriCool',
+          'Welcome to L\'BriCool',
           style: TextStyle(
               fontSize: 23, fontWeight: FontWeight.w500, color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: Color(0xFF40189D),
+        backgroundColor: const Color(0xFF40189D),
         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
@@ -32,6 +35,7 @@ class _WelcomePageState extends State<WelcomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 75),
+              // App logo
               Image.asset('images/bricool_logo.png', height: 120),
               const SizedBox(height: 40),
               const Align(
@@ -42,6 +46,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
               ),
               const SizedBox(height: 20),
+              // Student selection option
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -95,6 +100,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
               ),
               const SizedBox(height: 15),
+              // Client selection option
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -104,8 +110,9 @@ class _WelcomePageState extends State<WelcomePage> {
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color:
-                        !isStudentSelected ? Color(0xFF40189D) : Colors.white,
+                    color: !isStudentSelected
+                        ? const Color(0xFF40189D)
+                        : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.grey.shade300),
                     boxShadow: [
@@ -148,26 +155,31 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
+              // Proceed button to navigate to respective form
               Align(
                 alignment: Alignment.bottomRight,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF40189D),
+                    backgroundColor: const Color(0xFF40189D),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 11),
                   ),
                   onPressed: () {
-                    if (isStudentSelected == true) {
+                    // if student button is selected, then proceed to student form
+                    if (isStudentSelected) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const BasicInfoStudentPage(),
                         ),
                       );
-                    } else {
+                    }
+                    // else if client button is selected, then proceed to client form
+                    else {
                       Navigator.push(
                         context,
                         MaterialPageRoute(

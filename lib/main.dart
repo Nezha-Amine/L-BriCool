@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'intro_page.dart';
+import 'launch_page/intro_page.dart';
 
 // The home page will be first run
 void main() {

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'register.dart';
 
-class SignInPage extends StatefulWidget {
+class LogInPage extends StatefulWidget {
   @override
-  _SignInPageState createState() => _SignInPageState();
+  _LogInPageState createState() => _LogInPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _LogInPageState extends State<LogInPage> {
   bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF40189D),
+        backgroundColor: const Color(0xFF40189D),
         title: const Text(
-          'L\'Brikol',
+          'L\'BriCool',
           style: TextStyle(
               fontSize: 25, fontWeight: FontWeight.w500, color: Colors.white),
         ),
@@ -30,7 +30,7 @@ class _SignInPageState extends State<SignInPage> {
             children: [
               const SizedBox(height: 40),
               const Text(
-                "Sign In",
+                "Log In",
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 5),
@@ -78,7 +78,9 @@ class _SignInPageState extends State<SignInPage> {
               Align(
                 alignment: Alignment.center,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // TODO: Implement 'forgot password' logic after clicking on this button
+                  },
                   child: const Text("Forgot your password? Reset here"),
                 ),
               ),
@@ -93,7 +95,10 @@ class _SignInPageState extends State<SignInPage> {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    // TODO: Implement login logic and database interaction before navigating to the home page
+                    // this should navigate to the same page as the signup page after success
+                  },
                   child: const Text("LOGIN",
                       style: TextStyle(fontSize: 18, color: Colors.white)),
                 ),

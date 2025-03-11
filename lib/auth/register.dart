@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'signin.dart';
+import 'package:lbrikol/auth/login.dart';
 import 'package:lbrikol/after_auth/welcome_page.dart';
 
+// Stateful widget for the registration page
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -10,16 +11,18 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  // Boolean variables to toggle password visibility
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // App bar with title and custom background color
       appBar: AppBar(
-        backgroundColor: Color(0xFF40189D),
+        backgroundColor: const Color(0xFF40189D),
         title: const Text(
-          'L\'Brikol',
+          'L\'BriCool',
           style: TextStyle(
               fontSize: 25, fontWeight: FontWeight.w500, color: Colors.white),
         ),
@@ -32,17 +35,20 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 30),
+              const SizedBox(height: 40),
+              // Page heading
               const Text(
                 "Create an Account",
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 5),
+              // Subheading
               const Text(
                 "Please fill registration form below",
                 style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 25),
+              // Email input field
               TextField(
                 decoration: InputDecoration(
                   labelText: "Email",
@@ -54,6 +60,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               const SizedBox(height: 15),
+              // Password input field with visibility toggle
               TextField(
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
@@ -79,6 +86,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               const SizedBox(height: 15),
+              // Confirm password input field with visibility toggle
               TextField(
                 obscureText: _obscureConfirmPassword,
                 decoration: InputDecoration(
@@ -102,6 +110,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               const SizedBox(height: 20),
+              // Sign up button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -113,7 +122,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   onPressed: () {
-                    // We need to make the signup logic here before redirecting
+                    // TODO: Implement signup logic and database interaction before navigating to the home page
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -126,6 +135,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               const SizedBox(height: 15),
+              // Terms and conditions text
               Center(
                 child: RichText(
                   text: const TextSpan(
@@ -135,7 +145,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       TextSpan(
                         text: 'terms',
                         style: TextStyle(
-                          color: Color(0xFF40189D), // Purple color for "terms"
+                          color: Color(0xFF40189D),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -143,8 +153,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       TextSpan(
                         text: 'conditions',
                         style: TextStyle(
-                          color:
-                              Color(0xFF40189D), // Purple color for "condition"
+                          color: Color(0xFF40189D),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -155,42 +164,44 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 20),
               Column(
                 children: [
+                  // Divider for separation
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40),
                     child: Divider(
-                      color: Colors.grey.shade300, // Light grey line
+                      color: Colors.grey.shade300,
                       thickness: 1,
                     ),
                   ),
                   const SizedBox(height: 10),
+                  // Text prompting user to login
                   const Text(
                     "Already have an account?",
                     style: TextStyle(fontSize: 14, color: Colors.black),
                   ),
                   const SizedBox(height: 10),
+                  // Login button
                   SizedBox(
-                    width: 250, // Adjust width to match the button in the image
-                    height: 50, // Adjust height for a proper button look
+                    width: 250,
+                    height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color(0xFFE1D3FF), // Light purple color
+                        backgroundColor: const Color(0xFFE1D3FF),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(30), // Rounded edges
+                          borderRadius: BorderRadius.circular(30),
                         ),
                       ),
                       onPressed: () {
+                        // The button navigates to the login page
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => SignInPage()),
+                          MaterialPageRoute(builder: (context) => LogInPage()),
                         );
                       },
                       child: const Text(
                         "LOGIN",
                         style: TextStyle(
                           fontSize: 16,
-                          color: Color(0xFF40189D), // Dark purple text
+                          color: Color(0xFF40189D),
                           fontWeight: FontWeight.bold,
                         ),
                       ),

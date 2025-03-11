@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
     as dtp;
 
+// Note: The image_picker package doesn't work for me for
+// reasons idk about them
+// don't forget to execute in your terminal: flutter pub get image_picker
+// and try to uncomment lines 3, 21, 23-31 and 69
+
 class BasicInfoStudentPage extends StatefulWidget {
   const BasicInfoStudentPage({super.key});
 
@@ -15,7 +20,7 @@ class _BasicInfoStudentPageState extends State<BasicInfoStudentPage> {
   File? _image;
   // final picker = ImagePicker();
   final TextEditingController _dateController = TextEditingController();
-  //
+
   // Future<void> _pickImage() async {
   //   final pickedFile = await picker.pickImage(source: ImageSource.gallery);
   //   if (pickedFile != null) {

@@ -3,7 +3,7 @@ import 'launch_page/intro_page.dart';
 
 // The home page will be first run
 void main() {
-  runApp(Lbrikol());
+  runApp(const Lbrikol());
 }
 
 class Lbrikol extends StatefulWidget {

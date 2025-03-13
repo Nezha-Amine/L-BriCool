@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-// import 'package:lbrikol/student_form/skills_services_student.dart';
+import 'package:lbrikol/student_form/skills_services_student.dart';
 
 // Screen for collecting academic information from students.
 class AcademicInformationScreen extends StatefulWidget {
@@ -39,12 +39,10 @@ class _AcademicInformationScreenState extends State<AcademicInformationScreen> {
         ),
       );
     } else {
-      // Waiting for the skills and services page to be implemented
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //       builder: (context) => const AcademicInformationScreen()),
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SkillsServicesScreen()),
+      );
     }
   }
 
@@ -83,13 +81,13 @@ class _AcademicInformationScreenState extends State<AcademicInformationScreen> {
             ),
             const SizedBox(height: 35),
             _buildTextField("Academic Information", "Enter academic details",
-                _academicInfoController),
+                controller: _academicInfoController),
             const SizedBox(height: 30),
             _buildTextField("Field of Study", "Enter your field of study",
-                _fieldOfStudyController),
+                controller: _fieldOfStudyController),
             const SizedBox(height: 30),
             _buildTextField("Year of Study", "e.g., 1st Year, 2nd Year",
-                _yearOfStudyController),
+                controller: _yearOfStudyController, isNumber: true),
             const SizedBox(height: 30),
             Center(
               child: ElevatedButton(
@@ -114,20 +112,22 @@ class _AcademicInformationScreenState extends State<AcademicInformationScreen> {
   }
 
   // Builds a text field with optional number input and an icon.
-  Widget _buildTextField(
-      String label, String hint, TextEditingController controller) {
+  Widget _buildTextField(String label, String hint,
+      {bool isNumber = false,
+      IconData? icon,
+      TextEditingController? controller}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
+        Text(label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 5),
         TextField(
           controller: controller,
+          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
           decoration: InputDecoration(
             hintText: hint,
+            prefixIcon: icon != null ? Icon(icon) : null,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             contentPadding: const EdgeInsets.symmetric(horizontal: 15),
           ),

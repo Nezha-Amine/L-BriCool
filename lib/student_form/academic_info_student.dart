@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lbrikol/student_form/skills_services_student.dart';
+// import 'package:lbrikol/student_form/skills_services_student.dart';
 
 // Screen for collecting academic information from students.
 class AcademicInformationScreen extends StatefulWidget {

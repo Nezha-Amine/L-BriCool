@@ -12,12 +12,12 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  dropdown_button2: ^2.3.9
+  flutter_custom_clippers: ^2.1.0
   smooth_page_indicator: ^1.2.1
-#  image_picker: ^1.1.2
+  #  image_picker: ^1.1.2
   flutter_datetime_picker_plus: ^2.2.0
   font_awesome_flutter: ^10.8.0
-  dropdown_button2: ^2.3.9
-  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -27,4 +27,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-   - images/
+    - images/

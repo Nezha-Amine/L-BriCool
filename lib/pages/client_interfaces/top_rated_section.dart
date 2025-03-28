@@ -9,7 +9,6 @@ class TopRatedSection extends StatelessWidget {
       children: [
 
 
-        // Top rated provider card
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.all(12),
@@ -95,7 +94,6 @@ class TopRatedSection extends StatelessWidget {
                 ),
               ),
 
-              // Bookmark icon
               IconButton(
                 onPressed: () {},
                 icon: const Icon(

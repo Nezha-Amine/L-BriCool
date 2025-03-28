@@ -32,6 +32,7 @@ class SuccessDialog extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black, // Ensure title is black
                 ),
               ),
               const SizedBox(height: 20),
@@ -51,7 +52,10 @@ class SuccessDialog extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                ),
               ),
               const SizedBox(height: 20),
               ElevatedButton(

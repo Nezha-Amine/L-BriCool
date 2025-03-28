@@ -16,7 +16,6 @@ class _WelcomePageState extends State<WelcomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Boolean to track selection between student and client
   bool isStudentSelected = true;
 
 
@@ -28,7 +27,6 @@ class _WelcomePageState extends State<WelcomePage> {
         'role': isStudentSelected ? 'student' : 'client',
       });
 
-      // Navigate to the respective profile setup page
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -44,7 +42,6 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // App bar with title and styling
       appBar: AppBar(
         title: const Text(
           'Welcome to L\'BriCool',
@@ -183,7 +180,6 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
               ),
               const SizedBox(height: 30),
-              // Proceed button to navigate to respective form
               Align(
                 alignment: Alignment.bottomRight,
                 child: ElevatedButton(

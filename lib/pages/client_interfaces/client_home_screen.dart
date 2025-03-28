@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lbricool/pages/chat/chat_users_screen.dart';
 import 'package:lbricool/pages/client_interfaces/popular_services_section.dart';
 import 'package:lbricool/pages/client_interfaces/top_rated_section.dart';
 import 'package:lbricool/pages/client_interfaces/client_history_screen.dart';
@@ -47,11 +48,9 @@ class _ClientHomeScreenState extends State<ClientHomeScreen>
     );
     _controller.forward();
 
-    // Fetch user name from backend
     _fetchUserData();
   }
 
-  // Fetch user data from Firestore using the improved getCurrentUser method
   Future<void> _fetchUserData() async {
     setState(() {
       _isLoading = true;
@@ -90,42 +89,37 @@ class _ClientHomeScreenState extends State<ClientHomeScreen>
     );
   }
 
-  // Handle navigation based on bottom nav bar selection
   void _handleNavigation(int index) {
-    // If selecting the current index, do nothing
     if (index == _currentIndex) return;
 
     setState(() {
       _currentIndex = index;
     });
 
-    // Navigate to the appropriate screen based on index
     switch (index) {
-      case 0: // Home - already on home screen
+      case 0:
         break;
       case 1: // History
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ClientHistoryScreen()),
         ).then((_) {
-          // When returning from History screen, reset the index to Home
           setState(() {
             _currentIndex = 0;
           });
         });
         break;
-      /*case 2: // Chat
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ChatScreen()),
-        ).then((_) {
-          // When returning from Chat screen, reset the index to Home
+    case 2: // Chat
+    Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => const ChatUsersScreen(isClient: true)),
+    ).then((_) {
           setState(() {
             _currentIndex = 0;
           });
         });
         break;
-      case 3: // Profile
+        /*case 3: // Profile
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ProfileScreen()),
@@ -160,7 +154,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen>
             },
           ),
 
-          // Add spacing to accommodate the overlaid search bar
           const SizedBox(height: 30),
 
           // Scrollable content
@@ -170,7 +163,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   children: [
-                    // Popular services section with view all
                     _buildSectionWithHeader(
                       title: "Popular Services",
                       child: const PopularServicesSection(),
@@ -178,7 +170,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen>
 
                     const SizedBox(height: 20),
 
-                    // Browse all categories section with view all
                     _buildSectionWithHeader(
                       title: "Browse all categories",
                       child: const BrowseCategoriesSection(),
@@ -186,7 +177,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen>
 
                     const SizedBox(height: 20),
 
-                    // Top rated section with view all
                     _buildSectionWithHeader(
                       title: "Top rated",
                       child: const TopRatedSection(),
@@ -194,12 +184,10 @@ class _ClientHomeScreenState extends State<ClientHomeScreen>
 
                     const SizedBox(height: 20),
 
-                    // Featured section (Dog walkers)
                     const FeaturedSection(),
 
                     const SizedBox(height: 30),
 
-                    // Create general button with text
                     Column(
                       children: [
                         Text(
@@ -214,7 +202,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen>
                       ],
                     ),
 
-                    const SizedBox(height: 80), // Space for FAB and bottom nav
+                    const SizedBox(height: 80),
                   ],
                 ),
               ),
@@ -236,12 +224,11 @@ class _ClientHomeScreenState extends State<ClientHomeScreen>
           BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
-        onItemTapped: _handleNavigation, // Use the new navigation handler
+        onItemTapped: _handleNavigation,
       ),
     );
   }
 
-  // Helper method to build section with header and "View all" button
   Widget _buildSectionWithHeader({required String title, required Widget child}) {
     return Column(
       children: [
@@ -257,7 +244,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen>
             ),
             TextButton(
               onPressed: () {
-                // Navigate to view all screen
               },
               child: Row(
                 children: [

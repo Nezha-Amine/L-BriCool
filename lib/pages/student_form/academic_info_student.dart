@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lbricool/pages/student_form/skills_services.dart';
 
-import '../student_interfaces/home_page_gigs.dart';
-// import 'package:lbrikol/student_form/skills_services_student.dart';
 
-// Screen for collecting academic information from students.
 class AcademicInformationScreen extends StatefulWidget {
   final String fullName;
   final String birthDate;
@@ -35,22 +32,19 @@ class AcademicInformationScreen extends StatefulWidget {
 
 
 class _AcademicInformationScreenState extends State<AcademicInformationScreen> {
-  // Controllers for text fields
   final TextEditingController _academicInfoController = TextEditingController();
   final TextEditingController _fieldOfStudyController = TextEditingController();
   final TextEditingController _yearOfStudyController = TextEditingController();
 
   @override
   void dispose() {
-    // Dispose controllers to free up resources
     _academicInfoController.dispose();
     _fieldOfStudyController.dispose();
     _yearOfStudyController.dispose();
     super.dispose();
   }
 
-  // Validates input fields before proceeding to the next page.
-  // fields should not be empty
+
   void _validateAndProceed() {
     if (_academicInfoController.text.isEmpty ||
         _fieldOfStudyController.text.isEmpty ||
@@ -148,7 +142,6 @@ class _AcademicInformationScreenState extends State<AcademicInformationScreen> {
     );
   }
 
-  // Builds a text field with optional number input and an icon.
   Widget _buildTextField(
       String label, String hint, TextEditingController controller) {
     return Column(

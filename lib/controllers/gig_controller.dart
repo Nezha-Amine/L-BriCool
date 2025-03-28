@@ -11,7 +11,7 @@ class GigController {
 
   Future<UserModel?> getCurrentUser() async {
     try {
-      return await _authController.getCurrentUser(); // Use getCurrentUser method
+      return await _authController.getCurrentUser();
     } catch (e) {
       print('Error getting current user: $e');
       return null;
@@ -20,7 +20,8 @@ class GigController {
   // Create a new gig
   Future<bool> createGig(GigModel gig) async {
     try {
-      await _firestore.collection('gigs').add(gig.toMap());
+      final gigWithPendingStatus = gig.copyWith(status: 'pending');
+      await _firestore.collection('gigs').add(gigWithPendingStatus.toMap());
       return true;
     } catch (e) {
       print('Error creating gig: $e');
@@ -28,13 +29,12 @@ class GigController {
     }
   }
 
-  // Get all gigs by current user
   Future<List<GigModel>> getMyGigs() async {
     try {
-      final user = await _authController.getCurrentUser(); // This returns UserModel?
+      final user = await _authController.getCurrentUser();
       if (user == null) return [];
 
-      String userId = user.id; // Extract the ID from the user model
+      String userId = user.id;
 
       QuerySnapshot gigDocs = await _firestore
           .collection('gigs')
@@ -50,10 +50,15 @@ class GigController {
       return [];
     }
   }
-  // Update gig status
   Future<bool> updateGigStatus(String gigId, String status) async {
     try {
-      await _firestore.collection('gigs').doc(gigId).update({'status': status});
+      if (!['pending', 'active', 'completed', 'cancelled'].contains(status)) {
+        return false;
+      }
+
+      await _firestore.collection('gigs').doc(gigId).update({
+        'status': status,
+      });
       return true;
     } catch (e) {
       print('Error updating gig status: $e');
@@ -61,7 +66,6 @@ class GigController {
     }
   }
 
-  // Delete a gig
   Future<bool> deleteGig(String gigId) async {
     try {
       await _firestore.collection('gigs').doc(gigId).delete();
@@ -72,29 +76,11 @@ class GigController {
     }
   }
 
-  // Get gigs that can be browsed by students (excluding ones they've already applied to)
   Future<List<GigModel>> getBrowseableGigs({String? category}) async {
     try {
-      Query query = _firestore
-          .collection('gigs')
-          .where('status', isEqualTo: 'active')
-          .orderBy('createdAt', descending: true);
-
-      // Apply category filter if provided
-      if (category != null && category != 'All') {
-        query = query.where('category', isEqualTo: category);
-      }
-
-      QuerySnapshot gigDocs = await query.get();
-      List<GigModel> allGigs = gigDocs.docs
-          .map((doc) => GigModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
-          .toList();
-
-      // Get the current user ID
       final studentId = _authController.getCurrentUserId();
-      if (studentId == null) return allGigs;
+      if (studentId == null) return [];
 
-      // Get all gig IDs that the student has applied for
       QuerySnapshot applications = await _firestore
           .collection('applications')
           .where('studentId', isEqualTo: studentId)
@@ -104,15 +90,29 @@ class GigController {
           .map((doc) => (doc.data() as Map<String, dynamic>)['gigId'] as String)
           .toSet();
 
-      // Filter out gigs that the student has already applied for
-      return allGigs.where((gig) => !appliedGigIds.contains(gig.id)).toList();
+      Query query = _firestore
+          .collection('gigs')
+          .where('status', isEqualTo: 'pending')
+          .orderBy('createdAt', descending: true);
+
+      if (category != null && category != 'All') {
+        query = query.where('category', isEqualTo: category);
+      }
+
+      QuerySnapshot gigDocs = await query.get();
+
+      List<GigModel> browseableGigs = gigDocs.docs
+          .map((doc) => GigModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+          .where((gig) => !appliedGigIds.contains(gig.id))
+          .toList();
+
+      return browseableGigs;
     } catch (e) {
       print('Error getting browseable gigs: $e');
       return [];
     }
   }
 
-// Get a specific gig by ID
   Future<GigModel?> getGigById(String gigId) async {
     try {
       DocumentSnapshot gigDoc = await _firestore.collection('gigs').doc(gigId).get();
@@ -127,7 +127,6 @@ class GigController {
     }
   }
 
-  // Convert TimeOfDay to map for storage
   Map<String, int> timeOfDayToMap(TimeOfDay time) {
     return {
       'hour': time.hour,
@@ -135,11 +134,32 @@ class GigController {
     };
   }
 
-  // Convert map to TimeOfDay for display
   TimeOfDay mapToTimeOfDay(Map<String, int> timeMap) {
     return TimeOfDay(
       hour: timeMap['hour'] ?? 0,
       minute: timeMap['minute'] ?? 0,
     );
+  }
+
+  Future<List<GigModel>> getStudentGigs() async {
+    try {
+      final user = await _authController.getCurrentUser();
+      if (user == null) return [];
+
+      String studentId = user.id;
+
+      QuerySnapshot gigDocs = await _firestore
+          .collection('gigs')
+          .where('selectedStudentId', isEqualTo: studentId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return gigDocs.docs
+          .map((doc) => GigModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+          .toList();
+    } catch (e) {
+      print('Error getting student gigs: $e');
+      return [];
+    }
   }
 }

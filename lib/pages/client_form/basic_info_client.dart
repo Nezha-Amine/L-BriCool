@@ -13,23 +13,19 @@ class BasicInfoClientPage extends StatefulWidget {
 }
 
 class _BasicInfoClientPageState extends State<BasicInfoClientPage> {
-  // Controllers for form fields
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
-  // Other variables
   File? _image;
   final picker = ImagePicker();
-  String _selectedGender = "Male"; // Default gender
-  bool _isLoading = false; // Loading state
+  String _selectedGender = "Male";
+  bool _isLoading = false;
 
-  // Create instance of profile controller
   final ProfileController _profileController = ProfileController();
 
-  // Method to pick image from gallery
   Future<void> _pickImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -56,7 +52,6 @@ class _BasicInfoClientPageState extends State<BasicInfoClientPage> {
     );
   }
 
-  // Method to validate and save client information
   void _saveClientInfo() async {
     // Validate form fields
     if (_nameController.text.isEmpty ||
@@ -70,7 +65,6 @@ class _BasicInfoClientPageState extends State<BasicInfoClientPage> {
       return;
     }
 
-    // Parse age to integer
     int? age = int.tryParse(_ageController.text);
     if (age == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -79,12 +73,10 @@ class _BasicInfoClientPageState extends State<BasicInfoClientPage> {
       return;
     }
 
-    // Show loading indicator
     setState(() {
       _isLoading = true;
     });
 
-    // Save client info using the controller
     await _profileController.saveClientInfo(
       fullName: _nameController.text,
       birthDate: _dateController.text,
@@ -96,7 +88,6 @@ class _BasicInfoClientPageState extends State<BasicInfoClientPage> {
       context: context,
     );
 
-    // Hide loading indicator
     setState(() {
       _isLoading = false;
     });
@@ -104,7 +95,6 @@ class _BasicInfoClientPageState extends State<BasicInfoClientPage> {
 
   @override
   void dispose() {
-    // Dispose controllers to prevent memory leaks
     _nameController.dispose();
     _dateController.dispose();
     _ageController.dispose();

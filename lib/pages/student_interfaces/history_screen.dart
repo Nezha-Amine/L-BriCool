@@ -70,9 +70,17 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
   Future<void> _loadApplications() async {
     List<ApplicationModel> applications = await _applicationController.getMyApplications();
 
-    // Filter by status if needed
+    // Filter by status if needed, but only include application-specific statuses
     if (_selectedStatus != 'All') {
-      applications = applications.where((app) => app.status == _selectedStatus.toLowerCase()).toList();
+      applications = applications.where((app) =>
+      ['pending', 'accepted', 'rejected', 'cancelled'].contains(app.status.toLowerCase()) &&
+          app.status.toLowerCase() == _selectedStatus.toLowerCase()
+      ).toList();
+    } else {
+      // When 'All' is selected, only show application-specific statuses
+      applications = applications.where((app) =>
+          ['pending', 'accepted', 'rejected', 'cancelled'].contains(app.status.toLowerCase())
+      ).toList();
     }
 
     setState(() {
@@ -81,11 +89,17 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
   }
 
   Future<void> _loadGigs() async {
-    List<GigModel> gigs = await _gigController.getMyGigs();
+    List<GigModel> gigs = await _gigController.getStudentGigs();
 
-    // Filter by status if needed
     if (_selectedStatus != 'All') {
-      gigs = gigs.where((gig) => gig.status == _selectedStatus.toLowerCase()).toList();
+      gigs = gigs.where((gig) =>
+      ['active', 'completed', 'cancelled'].contains(gig.status.toLowerCase()) &&
+          gig.status.toLowerCase() == _selectedStatus.toLowerCase()
+      ).toList();
+    } else {
+      gigs = gigs.where((gig) =>
+          ['active', 'completed', 'cancelled'].contains(gig.status.toLowerCase())
+      ).toList();
     }
 
     setState(() {
@@ -94,7 +108,6 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
   }
 
   Future<void> _cancelApplication(String applicationId) async {
-    // Show confirmation dialog
     bool confirm = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -136,10 +149,8 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
-      // Remove the SafeArea to allow app bar to cover the status bar
       body: Column(
         children: [
-          // Top section with curved app bar (now will cover status bar)
           HomeTopScreenContent(
             fadeAnimation: _fadeAnimation,
             notificationOverlay: _notificationOverlay,
@@ -150,7 +161,6 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
 
           ),
 
-          // Tab buttons
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
@@ -538,7 +548,6 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
             statusColor = Colors.black;
         }
 
-        // Updated gig card design to match BrowseGigsScreen
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
           decoration: BoxDecoration(

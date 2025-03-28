@@ -1,4 +1,3 @@
-// gig_applications_screen.dart
 import 'package:flutter/material.dart';
 import 'package:lbricool/pages/client_interfaces/student_profile_view.dart';
 import '../../controllers/application_controller.dart';
@@ -6,7 +5,6 @@ import '../../controllers/gig_controller.dart';
 import '../../models/application_model.dart';
 import '../../models/gig_model.dart';
 import 'application_card.dart';
-
 
 class GigApplicationsScreen extends StatefulWidget {
   final String gigId;
@@ -38,6 +36,42 @@ class _GigApplicationsScreenState extends State<GigApplicationsScreen> {
     _gigFuture = _gigController.getGigById(widget.gigId);
   }
 
+  Future<Widget?> _buildCompleteButton() async {
+    final gig = await _gigFuture;
+
+    final applications = await _applicationsFuture;
+
+    final hasAcceptedApplication = applications.any((app) => app.status == 'accepted');
+
+    bool canComplete = gig?.status == 'active' && hasAcceptedApplication;
+
+    if (!canComplete) {
+      return null;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ElevatedButton(
+        onPressed: () => _updateGigStatus('completed'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF40189D),
+          minimumSize: const Size(double.infinity, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: const Text(
+          'MARK AS COMPLETE',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +90,6 @@ class _GigApplicationsScreenState extends State<GigApplicationsScreen> {
       ),
       body: Column(
         children: [
-          // Gig details header
           FutureBuilder<GigModel?>(
             future: _gigFuture,
             builder: (context, snapshot) {
@@ -102,7 +135,7 @@ class _GigApplicationsScreenState extends State<GigApplicationsScreen> {
                     Text(
                       gig.description,
                       style: const TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                       maxLines: 2,
@@ -110,11 +143,8 @@ class _GigApplicationsScreenState extends State<GigApplicationsScreen> {
                     ),
                     const SizedBox(height: 8),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(Icons.monetization_on,
-                            size: 16,
-                            color: Colors.grey[600]),
-                        const SizedBox(width: 4),
                         Text(
                           '\$${gig.hourlyRate.toStringAsFixed(2)}/hr',
                           style: TextStyle(
@@ -122,18 +152,17 @@ class _GigApplicationsScreenState extends State<GigApplicationsScreen> {
                             color: Colors.grey[800],
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Icon(Icons.calendar_today,
-                            size: 16,
-                            color: Colors.grey[600]),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${gig.startDate.day}/${gig.startDate.month}/${gig.startDate.year}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[800],
+                        if (gig.status != 'completed')
+                          TextButton(
+                            onPressed: () => _updateGigStatus('cancelled'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text('Cancel'),
                           ),
-                        ),
                       ],
                     ),
                   ],
@@ -142,7 +171,6 @@ class _GigApplicationsScreenState extends State<GigApplicationsScreen> {
             },
           ),
 
-          // Applications list
           Expanded(
             child: FutureBuilder<List<ApplicationModel>>(
               future: _applicationsFuture,
@@ -161,6 +189,9 @@ class _GigApplicationsScreenState extends State<GigApplicationsScreen> {
 
                 final applications = snapshot.data ?? [];
 
+                final relevantApplications = applications
+                    .where((app) => ['pending', 'accepted', 'completed'].contains(app.status))
+                    .toList();
                 if (applications.isEmpty) {
                   return Center(
                     child: Column(
@@ -198,9 +229,9 @@ class _GigApplicationsScreenState extends State<GigApplicationsScreen> {
                   color: const Color(0xFF40189D),
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
-                    itemCount: applications.length,
+                    itemCount: relevantApplications.length,
                     itemBuilder: (context, index) {
-                      final application = applications[index];
+                      final application = relevantApplications[index];
                       return ApplicationCard(
                         application: application,
                         onViewProfile: () => _viewStudentProfile(application.studentId),
@@ -219,6 +250,15 @@ class _GigApplicationsScreenState extends State<GigApplicationsScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: FutureBuilder<Widget?>(
+        future: _buildCompleteButton(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const SizedBox.shrink(); // Show nothing while loading
+          }
+          return snapshot.data ?? const SizedBox.shrink();
+        },
+      ),
     );
   }
 
@@ -226,7 +266,10 @@ class _GigApplicationsScreenState extends State<GigApplicationsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => StudentProfileView(studentId: studentId),
+        builder: (context) => StudentProfileView(
+          studentId: studentId,
+          gigId: widget.gigId,
+        ),
       ),
     );
   }
@@ -276,6 +319,58 @@ class _GigApplicationsScreenState extends State<GigApplicationsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Failed to update application status'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _updateGigStatus(String status) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(status == 'completed' ? 'Complete Gig?' : 'Cancel Gig?'),
+        content: Text(
+            status == 'completed'
+                ? 'Are you sure you want to mark this gig as completed?'
+                : 'Are you sure you want to cancel this gig?'
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: status == 'completed' ? Colors.green : Colors.red,
+            ),
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    ) ?? false;
+
+    if (result) {
+      final success = await _applicationController.updateGigStatus(widget.gigId, status);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                status == 'completed'
+                    ? 'Gig marked as completed'
+                    : 'Gig cancelled successfully'
+            ),
+            backgroundColor: status == 'completed' ? Colors.green : Colors.red,
+          ),
+        );
+        _loadData();
+        setState(() {});
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to update gig status'),
             backgroundColor: Colors.red,
           ),
         );

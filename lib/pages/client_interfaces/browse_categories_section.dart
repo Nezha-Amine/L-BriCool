@@ -1,4 +1,3 @@
-// browse_categories_section.dart
 import 'package:flutter/material.dart';
 
 class CategoryItem {
@@ -22,36 +21,34 @@ class BrowseCategoriesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sample category items
     final List<CategoryItem> categories = [
       CategoryItem(
-        title: '',
-        icon: Icons.psychology,
+        title: 'Babysitting',
+        icon: Icons.child_care,
         backgroundColor: Colors.blue.shade50,
         iconColor: Colors.blue,
         onTap: () {
-          // Handle psychology tap
+          // Handle babysitting tap
         },
       ),
       CategoryItem(
-        title: '',
+        title: 'Tutoring',
         icon: Icons.edit,
         backgroundColor: Colors.purple.shade50,
         iconColor: Colors.purple,
         onTap: () {
-          // Handle edit tap
+          // Handle tutoring tap
         },
       ),
       CategoryItem(
-        title: 'general',
-        icon: Icons.chat_bubble,
+        title: 'Others',
+        icon: Icons.more_horiz,
         backgroundColor: Colors.grey.shade200,
         iconColor: Colors.purple.shade700,
         onTap: () {
-          // Handle general tap
+          // Handle others tap
         },
       ),
-      // Add more categories as needed
     ];
 
     return SizedBox(
@@ -87,18 +84,17 @@ class BrowseCategoriesSection extends StatelessWidget {
                 ),
 
                 // Category title
-                if (categories[index].title.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      categories[index].title,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[800],
-                      ),
-                      textAlign: TextAlign.center,
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    categories[index].title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[800],
                     ),
+                    textAlign: TextAlign.center,
                   ),
+                ),
               ],
             ),
           );

@@ -6,12 +6,8 @@ import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
 import 'package:google_fonts/google_fonts.dart';
 import 'academic_info_student.dart';
 
-// Quick note: The image_picker package doesn't work for me for
-// reasons idk about them
-// don't forget to execute in your terminal: flutter pub get image_picker
-// and try to uncomment lines 3, 24, 34-42 and 131
 
-// Page for collecting basic information from students.
+
 class BasicInfoStudentPage extends StatefulWidget {
   const BasicInfoStudentPage({super.key});
 
@@ -31,7 +27,6 @@ class _BasicInfoStudentPageState extends State<BasicInfoStudentPage> {
 
   String? _selectedGender;
 
-  // Function to pick an image from the gallery.
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -41,7 +36,6 @@ class _BasicInfoStudentPageState extends State<BasicInfoStudentPage> {
     }
   }
 
-  // Function to pick a birth date using a date picker.
   void _pickDate() {
     dtp.DatePicker.showDatePicker(
       context,
@@ -58,8 +52,7 @@ class _BasicInfoStudentPageState extends State<BasicInfoStudentPage> {
     );
   }
 
-  // Validates input fields before proceeding to the next page.
-  // fields should not be empty
+
   void _validateAndProceed() {
     if (_fullNameController.text.isEmpty ||
         _dateController.text.isEmpty ||
@@ -74,7 +67,6 @@ class _BasicInfoStudentPageState extends State<BasicInfoStudentPage> {
         ),
       );
     } else {
-      // Pass the collected data to the next screen
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -160,7 +152,6 @@ class _BasicInfoStudentPageState extends State<BasicInfoStudentPage> {
             _buildDateField("Birth Date", _dateController, _pickDate),
             const SizedBox(height: 15),
 
-            /// Gender and Age Fields
             Row(
               children: [
                 Expanded(
@@ -209,7 +200,6 @@ class _BasicInfoStudentPageState extends State<BasicInfoStudentPage> {
     );
   }
 
-  // Builds a text field with optional number input and an icon.
   Widget _buildTextField(String label, String hint,
       {bool isNumber = false,
       IconData? icon,

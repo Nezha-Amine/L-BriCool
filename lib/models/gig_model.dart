@@ -9,15 +9,16 @@ class GigModel {
   final DateTime startDate;
   final DateTime? endDate;
   final bool isDateRange;
-  final Map<String, int> startTime; // Store as hours and minutes
+  final Map<String, int> startTime;
   final Map<String, int> endTime;
-  final List<Map<String, String>> childrenDetails; // For babysitting
+  final List<Map<String, String>> childrenDetails;
   final List<String> languages;
   final List<String> tasks;
   final String clientId;
   final String clientName;
   final Timestamp createdAt;
-  final String status; // pending, active, completed, cancelled
+  final String status;
+  final String? selectedStudentId;
 
   GigModel({
     this.id,
@@ -36,11 +37,10 @@ class GigModel {
     required this.clientId,
     required this.clientName,
     required this.createdAt,
-    this.status = 'active',
-
+    this.status = 'pending',
+    this.selectedStudentId,
   });
 
-  // Convert to Map for Firestore
   Map<String, dynamic> toMap() {
     return {
       'category': category,
@@ -59,10 +59,10 @@ class GigModel {
       'clientName': clientName,
       'createdAt': createdAt,
       'status': status,
+      'selectedStudentId': selectedStudentId,
     };
   }
 
-  // Create GigModel from Firestore data
   factory GigModel.fromMap(Map<String, dynamic> map, String id) {
     return GigModel(
       id: id,
@@ -83,11 +83,12 @@ class GigModel {
       clientId: map['clientId'] ?? '',
       clientName: map['clientName'] ?? '',
       createdAt: map['createdAt'] ?? Timestamp.now(),
-      status: map['status'] ?? 'active',
+      status: map['status'] ?? 'pending',
+      selectedStudentId: map['selectedStudentId'],
     );
   }
 
-  // Create a copy with modified fields
+
   GigModel copyWith({
     String? id,
     String? category,
@@ -106,6 +107,7 @@ class GigModel {
     String? clientName,
     Timestamp? createdAt,
     String? status,
+    String? selectedStudentId,
   }) {
     return GigModel(
       id: id ?? this.id,
@@ -125,6 +127,7 @@ class GigModel {
       clientName: clientName ?? this.clientName,
       createdAt: createdAt ?? this.createdAt,
       status: status ?? this.status,
+      selectedStudentId: selectedStudentId ?? this.selectedStudentId,
     );
   }
 }

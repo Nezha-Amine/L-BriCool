@@ -1,4 +1,3 @@
-// application_card.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/application_model.dart';

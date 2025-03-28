@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lbricool/pages/student_form/success_dialogue.dart';
-import 'package:lbricool/pages/student_interfaces/home_page_gigs.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lbricool/controllers/profile_controller.dart';
@@ -47,7 +46,6 @@ class ProfileVerificationPage extends StatefulWidget {
 class _ProfileVerificationPageState extends State<ProfileVerificationPage> {
   bool _documentUploaded = false;
   bool _isSubmitting = false;
-  bool _showSuccessDialog = false;
   File? _documentFile;
   String _documentName = "";
   final ProfileController _profileController = ProfileController();
@@ -190,8 +188,10 @@ class _ProfileVerificationPageState extends State<ProfileVerificationPage> {
 
       setState(() {
         _isSubmitting = false;
-        _showSuccessDialog = true;
       });
+
+      _showSuccessDialogAndNavigate();
+
     } catch (e) {
       setState(() {
         _isSubmitting = false;
@@ -203,18 +203,26 @@ class _ProfileVerificationPageState extends State<ProfileVerificationPage> {
     }
   }
 
-  void _dismissSuccessDialog() {
-    setState(() {
-      _showSuccessDialog = false;
-    });
 
-    // Navigate to the Login Page instead of HomePageGigs
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) =>  LogInPage()), // Replace with your actual login page widget
-          (route) => false, // Remove all previous routes
+  void _showSuccessDialogAndNavigate() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return SuccessDialog(
+          message: 'Your application has been submitted successfully! Our team is reviewing your student verification, and you\'ll receive a confirmation message once approved. Stay tuned and get ready for your first gig! 🎉',
+          onOkPressed: () {
+            // Navigate to login page and remove all previous routes
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => LogInPage()),
+                  (Route<dynamic> route) => false,
+            );
+          },
+        );
+      },
     );
   }
+
 
 
   @override
@@ -392,12 +400,7 @@ class _ProfileVerificationPageState extends State<ProfileVerificationPage> {
             ),
           ),
 
-          // Import and use Success Dialog component
-          if (_showSuccessDialog)
-            SuccessDialog(
-              message: 'Your application has been submitted successfully! Our team is reviewing your student verification, and you\'ll receive a confirmation message once approved. Stay tuned and get ready for your first gig! 🎉',
-              onOkPressed: _dismissSuccessDialog,
-            ),
+
         ],
       ),
     );

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:lbricool/pages/client_interfaces/search_bar.dart';
 import '../../controllers/auth_controller.dart';
 import '../../models/user_model.dart';
+import '../auth/login.dart';
 import '../student_interfaces/home_top_screen/custom_curved_app_bar.dart';
 import '../student_interfaces/home_top_screen/menu_content.dart';
 import '../student_interfaces/home_top_screen/notification_overlay.dart';
+import '../student_interfaces/profile_screen.dart';
 
 class HomeTopScreenContent extends StatelessWidget {
   final Animation<double> fadeAnimation;
@@ -28,11 +30,13 @@ class HomeTopScreenContent extends StatelessWidget {
     this.onSearch,
   }) : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
+    final AuthController _authController = AuthController();
+
     return Stack(
       children: [
-        // Curved app bar with greeting and name
         ClipPath(
           clipper: CurvedBottomClipper(),
           child: Container(
@@ -108,7 +112,6 @@ class HomeTopScreenContent extends StatelessWidget {
                           ),
                         ),
 
-                        // Notification and menu icons
                         Row(
                           children: [
                             // Notification icon
@@ -119,15 +122,30 @@ class HomeTopScreenContent extends StatelessWidget {
                                 size: 28,
                               ),
                               onPressed: () {
-                                notificationOverlay.showNotifications(context);
+                                notificationOverlay.showNotifications(context, currentUserId: '');
                               },
                             ),
 
                             // Menu icon
                             MenuContent(
-                              onSelected: (value) {
-                                // Handle menu selection
-                                print('Selected: $value');
+                              onSelected: (value) async {
+                                switch (value) {
+                                  case 'Profile':
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => const ProfileScreen()),
+                                    );
+                                    break;
+                                  case 'Log Out':
+                                    await _authController.logout(); // Call the logout function
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(builder: (context) =>  LogInPage()), // Navigate to register screen
+                                          (route) => false, // Remove all previous routes
+                                    );
+                                    break;
+                                }
                               },
                             ),
                           ],
@@ -141,7 +159,6 @@ class HomeTopScreenContent extends StatelessWidget {
           ),
         ),
 
-        // Search bar overlay positioned at the bottom of the app bar
         if (showSearchBar)
           Positioned(
             bottom: 0,

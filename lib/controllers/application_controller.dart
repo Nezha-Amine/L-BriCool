@@ -1,4 +1,3 @@
-// application_controller.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/application_model.dart';
 import 'auth_controller.dart';
@@ -7,24 +6,20 @@ class ApplicationController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AuthController _authController = AuthController();
 
-  // Apply for a gig
   Future<bool> applyForGig(String gigId) async {
     try {
       final studentId = _authController.getCurrentUserId();
       if (studentId == null) return false;
 
-      // Check if already applied
       bool alreadyApplied = await hasAppliedToGig(gigId);
       if (alreadyApplied) return false;
 
-      // Get student name for the application
       final userDoc = await _firestore.collection('users').doc(studentId).get();
       String studentName = '';
       if (userDoc.exists) {
         studentName = userDoc.data()?['fullName'] ?? '';
       }
 
-      // Create application
       final application = ApplicationModel(
         gigId: gigId,
         studentId: studentId,
@@ -40,6 +35,9 @@ class ApplicationController {
       return false;
     }
   }
+
+
+
 
   // Check if the student has already applied for a gig
   Future<bool> hasAppliedToGig(String gigId) async {
@@ -100,39 +98,48 @@ class ApplicationController {
     }
   }
 
-  // Update application status (for client to accept/reject)
   Future<bool> updateApplicationStatus(String applicationId, String status) async {
     try {
+      DocumentSnapshot applicationDoc = await _firestore
+          .collection('applications')
+          .doc(applicationId)
+          .get();
+
+      if (!applicationDoc.exists) return false;
+
+      String gigId = (applicationDoc.data() as Map<String, dynamic>)['gigId'];
+      String studentId = (applicationDoc.data() as Map<String, dynamic>)['studentId'];
+
       await _firestore.collection('applications').doc(applicationId).update({
         'status': status,
         'updatedAt': Timestamp.now(),
       });
 
-      // If an application is accepted, reject all other applications for the same gig
       if (status == 'accepted') {
-        // Get the gig ID for this application
-        DocumentSnapshot appDoc = await _firestore.collection('applications').doc(applicationId).get();
-        if (appDoc.exists) {
-          String gigId = (appDoc.data() as Map<String, dynamic>)['gigId'];
+        await _firestore.collection('gigs').doc(gigId).update({
+          'status': 'active',
+          'selectedStudentId': studentId,
+        });
 
-          // Get all pending applications for this gig
-          QuerySnapshot otherApps = await _firestore
-              .collection('applications')
-              .where('gigId', isEqualTo: gigId)
-              .where('status', isEqualTo: 'pending')
-              .where(FieldPath.documentId, isNotEqualTo: applicationId)
-              .get();
+        // Get all pending applications for this gig
+        QuerySnapshot otherApps = await _firestore
+            .collection('applications')
+            .where('gigId', isEqualTo: gigId)
+            .where('status', isEqualTo: 'pending')
+            .where(FieldPath.documentId, isNotEqualTo: applicationId)
+            .get();
 
-          // Reject all other applications
-          WriteBatch batch = _firestore.batch();
-          for (var doc in otherApps.docs) {
-            batch.update(doc.reference, {
-              'status': 'rejected',
-              'updatedAt': Timestamp.now(),
-            });
-          }
-          await batch.commit();
+        // Reject all other applications
+        WriteBatch batch = _firestore.batch();
+        for (var doc in otherApps.docs) {
+          batch.update(doc.reference, {
+            'status': 'rejected',
+            'updatedAt': Timestamp.now(),
+          });
         }
+        await batch.commit();
+
+        return true;
       }
 
       return true;
@@ -141,6 +148,45 @@ class ApplicationController {
       return false;
     }
   }
+
+  Future<bool> updateGigStatus(String gigId, String status) async {
+    try {
+      // Validate status
+      if (!['active', 'completed', 'cancelled'].contains(status)) {
+        return false;
+      }
+
+      // Update gig status
+      await _firestore.collection('gigs').doc(gigId).update({
+        'status': status,
+      });
+
+      if (status == 'completed' || status == 'cancelled') {
+        QuerySnapshot acceptedApp = await _firestore
+            .collection('applications')
+            .where('gigId', isEqualTo: gigId)
+            .where('status', isEqualTo: 'accepted')
+            .limit(1)
+            .get();
+
+        if (acceptedApp.docs.isNotEmpty) {
+          await _firestore
+              .collection('applications')
+              .doc(acceptedApp.docs.first.id)
+              .update({
+            'status': status,
+            'updatedAt': Timestamp.now(),
+          });
+        }
+      }
+
+      return true;
+    } catch (e) {
+      print('Error updating gig status: $e');
+      return false;
+    }
+  }
+
   Future<ApplicationModel?> getMyApplicationForGig(String gigId) async {
     try {
       final studentId = _authController.getCurrentUserId();
@@ -162,6 +208,31 @@ class ApplicationController {
       );
     } catch (e) {
       print('Error getting my application for gig: $e');
+      return null;
+    }
+  }
+
+
+  // In application_controller.dart, add this method
+
+  Future<ApplicationModel?> getApplicationForGigAndStudent(String gigId, String studentId) async {
+    try {
+      QuerySnapshot applications = await _firestore
+          .collection('applications')
+          .where('gigId', isEqualTo: gigId)
+          .where('studentId', isEqualTo: studentId)
+          .limit(1)
+          .get();
+
+      if (applications.docs.isNotEmpty) {
+        return ApplicationModel.fromMap(
+            applications.docs.first.data() as Map<String, dynamic>,
+            applications.docs.first.id
+        );
+      }
+      return null;
+    } catch (e) {
+      print('Error getting application: $e');
       return null;
     }
   }

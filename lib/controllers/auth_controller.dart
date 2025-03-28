@@ -6,7 +6,7 @@ class AuthController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // **Sign Up**
+
   Future<UserModel?> signUp({
     required String email,
     required String password,
@@ -42,8 +42,7 @@ class AuthController {
     }
     return null;
   }
-// Add this method to AuthController class in auth_controller.dart
-// Add this to AuthController class
+
   String? getCurrentUserId() {
     return _auth.currentUser?.uid;
   }
@@ -69,14 +68,12 @@ class AuthController {
         password: password,
       );
 
-      // Fetch user data from Firestore
       DocumentSnapshot userDoc = await _firestore.collection('users').doc(userCredential.user!.uid).get();
 
       if (userDoc.exists) {
         var userData = userDoc.data() as Map<String, dynamic>;
         print("User data: $userData");
 
-        // Make sure to return the UserModel
         return UserModel.fromMap(userData);
       }
       return null;
@@ -86,7 +83,6 @@ class AuthController {
     }
   }
 
-// Add to AuthController class
   Stream<UserModel?> getCurrentUserStream() {
     String? userId = _auth.currentUser?.uid;
     if (userId == null) return Stream.value(null);
@@ -97,7 +93,6 @@ class AuthController {
         ? UserModel.fromMap(snapshot.data() as Map<String, dynamic>)
         : null);
   }
-  // **Logout**
   Future<void> logout() async {
     await _auth.signOut();
   }

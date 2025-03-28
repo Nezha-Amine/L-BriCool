@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:lbricool/pages/student_interfaces/profile_screen.dart';
 
+import '../chat/chat_users_screen.dart';
 import 'body_items/gigs_body_home.dart';
 import 'bottom_nav_bar.dart';
 import 'browse_gigs_screen.dart';
-import 'chat_screen.dart';
+
 import 'history_screen.dart';
 import 'home_top_screen/notification_overlay.dart';
-import 'home_top_screen/revenue_container.dart';
 import 'home_top_screen/top_screen_content.dart';
 
-// MainScreen: holds the bottom navigation bar and switches between pages
 class HomePageGigs extends StatefulWidget {
   const HomePageGigs({super.key});
 
@@ -26,7 +25,6 @@ class _HomePageGigs extends State<HomePageGigs>
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
-  // List of BottomNavigationBarItems
   final List<BottomNavigationBarItem> _bottomNavItems = const [
     BottomNavigationBarItem(
       icon: Icon(Icons.home),
@@ -37,7 +35,7 @@ class _HomePageGigs extends State<HomePageGigs>
       label: 'Browse gigs',
     ),
     BottomNavigationBarItem(
-      icon: Icon(Icons.history),
+      icon: Icon(Icons.book),
       label: 'History',
     ),
     BottomNavigationBarItem(
@@ -71,10 +69,8 @@ class _HomePageGigs extends State<HomePageGigs>
 
   @override
   Widget build(BuildContext context) {
-    // Build the current page based on _currentIndex
     Widget currentPage;
     if (_currentIndex == 0) {
-      // For home page, use HomeTopScreenContent and the RevenueContainer
       currentPage = Column(
         children: [
           Expanded(
@@ -100,14 +96,13 @@ class _HomePageGigs extends State<HomePageGigs>
     } else if (_currentIndex == 2) {
       currentPage = const HistoryScreen();
     } else if (_currentIndex == 3) {
-      currentPage = const ChatScreen();
+      currentPage = const ChatUsersScreen();
     } else {
       currentPage = const ProfileScreen();
     }
 
     return Scaffold(
-      // No app bar here, it's included in HomeTopScreenContent
-      body: currentPage,
+      backgroundColor: const Color(0xFFF6F6F6),      body: currentPage,
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _currentIndex,
         items: _bottomNavItems,

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1089382302405",
+    "project_id": "lbricool",
+    "storage_bucket": "lbricool.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1089382302405:android:09193eca0454ce621c66ac",
+        "android_client_info": {
+          "package_name": "com.example.lbricool"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxF9kVMlElb7zdKJR1ZZs-fYYg6RQd_cc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

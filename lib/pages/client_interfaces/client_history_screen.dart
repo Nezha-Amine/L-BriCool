@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../../controllers/gig_controller.dart';
 import '../../models/gig_model.dart';
+import '../chat/chat_users_screen.dart';
 import '../student_interfaces/home_top_screen/notification_overlay.dart';
 import '../student_interfaces/bottom_nav_bar.dart'; // Add this import
 import 'gig_applications_screen.dart';
@@ -83,36 +84,30 @@ class _ClientHistoryScreenState extends State<ClientHistoryScreen>
     });
   }
 
-  // Add navigation handler for bottom bar
   void _handleNavigation(int index) {
-    // If selecting the current index, do nothing
     if (index == _currentIndex) return;
 
     setState(() {
       _currentIndex = index;
     });
 
-    // Navigate to the appropriate screen based on index
     switch (index) {
       case 0: // Home
-        Navigator.pop(context); // Go back to home screen
-        break;
-      case 1: // History - already on history screen
-        break;
-      case 2: // Chat
-      // Navigate to Chat screen
-      // First pop to home, then push Chat screen
         Navigator.pop(context);
-        /*
+        break;
+      case 1:
+        break;
+      case 2:
         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ChatScreen()),
-        );
-        */
+        context,
+        MaterialPageRoute(builder: (_) => const ChatUsersScreen(isClient: true)),
+      ).then((_) {
+        setState(() {
+          _currentIndex = 0;
+        });
+      });
         break;
       case 3: // Profile
-      // Navigate to Profile screen
-      // First pop to home, then push Profile screen
         Navigator.pop(context);
         /*
         Navigator.push(
@@ -136,13 +131,11 @@ class _ClientHistoryScreenState extends State<ClientHistoryScreen>
       backgroundColor: const Color(0xFFF6F6F6),
       body: Column(
         children: [
-          // Custom app bar with History title
           HistoryTopScreen(
             fadeAnimation: _fadeAnimation,
             notificationOverlay: _notificationOverlay,
           ),
 
-          // Spacing after curved app bar
           const SizedBox(height: 20),
 
           // Filter chips
@@ -230,7 +223,6 @@ class _ClientHistoryScreenState extends State<ClientHistoryScreen>
           ),
         ],
       ),
-      // Add the bottom navigation bar
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _currentIndex,
         items: const [
@@ -239,15 +231,11 @@ class _ClientHistoryScreenState extends State<ClientHistoryScreen>
           BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
-        onItemTapped: _handleNavigation, // Use the navigation handler
+        onItemTapped: _handleNavigation,
       ),
-      // Add floating action button if needed for consistency
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate back to home then to create service form
           Navigator.pop(context);
-          // Then navigate to create service form
-          // This would typically be handled in the home screen
         },
         backgroundColor: const Color(0xFF40189D),
         child: const Icon(Icons.add, color: Colors.white),
@@ -262,7 +250,7 @@ class _ClientHistoryScreenState extends State<ClientHistoryScreen>
       MaterialPageRoute(
         builder: (context) => GigApplicationsScreen(gigId: gig.id!),
       ),
-    ).then((_) => _loadGigs()); // Refresh list when returning
+    ).then((_) => _loadGigs());
   }
 
   Future<void> _cancelGig(String gigId) async {

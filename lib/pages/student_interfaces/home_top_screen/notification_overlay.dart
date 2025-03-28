@@ -1,72 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
-/// NotificationOverlay is a class to show notification examples as an overlay
-/// on top of the current screen.
-///
-/// When the notification icon is pressed, it displays multiple notification examples.
-/// Clicking anywhere on the screen (outside the notifications) dismisses them.
 class NotificationOverlay {
-  /// Overlay entry to track and remove the overlay when needed
   OverlayEntry? _overlayEntry;
-
-  /// Boolean to track if notifications are currently being shown
   bool _isShowing = false;
 
-  /// Shows notification examples as an overlay on the current screen
-  ///
-  /// [context] The BuildContext to find the overlay
-  /// [alignment] The alignment of the notification panel (defaults to top-right)
-  /// [width] The width of each notification card
-  /// [notificationData] Optional custom notification data
   void showNotifications(
-    BuildContext context, {
-    Alignment alignment = Alignment.topRight,
-    double width = 300,
-    List<NotificationItem>? notificationData,
-  }) {
-    // If already showing, remove the current overlay first
+      BuildContext context, {
+        required String currentUserId,
+        Alignment alignment = Alignment.topRight,
+        double width = 300,
+      }) {
     if (_isShowing) {
       hideNotifications();
     }
 
-    // Default notification examples if none provided
-    final notifications = notificationData ??
-        [
-          NotificationItem(
-            title: "New Message",
-            message: "John sent you a message",
-            time: "2 min ago",
-            icon: Icons.message,
-            color: Colors.blue,
-          ),
-          NotificationItem(
-            title: "Payment Successful",
-            message: "Your payment of \$25 was successful",
-            time: "15 min ago",
-            icon: Icons.payment,
-            color: Colors.green,
-          ),
-          NotificationItem(
-            title: "Appointment Reminder",
-            message: "Your appointment is tomorrow at 10 AM",
-            time: "1 hour ago",
-            icon: Icons.calendar_today,
-            color: Colors.orange,
-          ),
-          NotificationItem(
-            title: "Update Available",
-            message: "A new app update is available",
-            time: "2 hours ago",
-            icon: Icons.system_update,
-            color: Colors.purple,
-          ),
-        ];
-
-    // Create the overlay entry
     _overlayEntry = OverlayEntry(
       builder: (context) => Stack(
         children: [
-          // Invisible layer to detect taps outside notification panel
           Positioned.fill(
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
@@ -74,10 +26,8 @@ class NotificationOverlay {
               child: Container(color: Colors.transparent),
             ),
           ),
-          // Notification panel with scrolling
           Positioned(
-            top: MediaQuery.of(context).padding.top +
-                60, // Position below app bar
+            top: MediaQuery.of(context).padding.top + 60,
             right: 10,
             child: Material(
               color: Colors.transparent,
@@ -109,16 +59,33 @@ class NotificationOverlay {
                       ),
                     ),
                     const Divider(height: 1),
-                    // Scrollable list of notifications
                     SizedBox(
-                      height: 250, // Adjust height as needed
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: notifications
-                              .map((notification) =>
+                      height: 250,
+                      child: StreamBuilder<List<NotificationItem>>(
+                        stream: getNotifications(currentUserId),
+                        builder: (context, snapshot) {
+                          print("dak snapchot data katbda hna:");
+                          print(snapshot.data);
+                          print("dak snapchot data katssali hna.");
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Center(
+                                child: Text("No notifications"));
+                          }
+                          final notifications = snapshot.data!;
+                          return SingleChildScrollView(
+                            child: Column(
+                              children: notifications
+                                  .map((notification) =>
                                   buildNotificationItem(notification))
-                              .toList(),
-                        ),
+                                  .toList(),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -130,18 +97,52 @@ class NotificationOverlay {
       ),
     );
 
-    // Add the overlay to the screen
     Overlay.of(context).insert(_overlayEntry!);
     _isShowing = true;
   }
 
-  /// Builds a single notification item widget
-  ///
-  /// [notification] The notification data to display
+  void hideNotifications() {
+    if (_isShowing && _overlayEntry != null) {
+      _overlayEntry!.remove();
+      _overlayEntry = null;
+      _isShowing = false;
+    }
+  }
+
+  bool get isShowing => _isShowing;
+
+  Stream<List<NotificationItem>> getNotifications(String userId) {
+    return FirebaseFirestore.instance
+        .collection('notifications')
+        .where('user_id', isEqualTo: userId)
+        .orderBy('time', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        final Timestamp timestamp = data['time'];
+        final DateTime dateTime = timestamp.toDate();
+        final String formattedTime =
+        DateFormat('hh:mm a').format(dateTime); // e.g., 02:45 PM
+        final String formattedDate =
+        DateFormat('dd MMM yyyy').format(dateTime); // e.g., 24 Mar 2025
+
+        return NotificationItem(
+          title: data['title'] ?? '',
+          message: data['message'] ?? '',
+          time: formattedTime,
+          date: formattedDate,
+          icon: Icons.notifications,
+          color: Colors.blue,
+        );
+      }).toList();
+    });
+  }
+
   Widget buildNotificationItem(NotificationItem notification) {
     return InkWell(
       onTap: () {
-        // Handle notification tap if needed
+        // Optional: Handle notification tap
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -193,14 +194,28 @@ class NotificationOverlay {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    notification.message,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade700,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          notification.message,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade700,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        notification.date,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -210,25 +225,13 @@ class NotificationOverlay {
       ),
     );
   }
-
-  /// Hides the notification overlay if it's currently showing
-  void hideNotifications() {
-    if (_isShowing && _overlayEntry != null) {
-      _overlayEntry!.remove();
-      _overlayEntry = null;
-      _isShowing = false;
-    }
-  }
-
-  /// Checks if notifications are currently being shown
-  bool get isShowing => _isShowing;
 }
 
-/// Data class to hold information about a single notification
 class NotificationItem {
   final String title;
   final String message;
   final String time;
+  final String date;
   final IconData icon;
   final Color color;
 
@@ -236,6 +239,7 @@ class NotificationItem {
     required this.title,
     required this.message,
     required this.time,
+    required this.date,
     required this.icon,
     required this.color,
   });

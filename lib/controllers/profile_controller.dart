@@ -10,27 +10,23 @@ class ProfileController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  final String cloudName = "dlers4po2";
-  final String apiKey = "926487664528451";
-  final String apiSecret = "wlSr9HCnlghrXzMWPl2n1wCUpME"; // Store securely, never expose in client code
+  final String cloudName = "uyour_cloud_name";
+  final String apiKey = "your_api_key";
+  final String apiSecret = "your_secret_key";
 
   Future<String?> uploadImageToCloudinary(File imageFile) async {
     try {
-      // Generate timestamp and signature
       int timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       String signature = generateSignature(timestamp, apiSecret);
 
-      // Create the request URL
       final url = Uri.parse("https://api.cloudinary.com/v1_1/$cloudName/image/upload");
 
-      // Create multipart request with authentication
       var request = http.MultipartRequest("POST", url)
         ..fields['api_key'] = apiKey
         ..fields['timestamp'] = timestamp.toString()
         ..fields['signature'] = signature
         ..files.add(await http.MultipartFile.fromPath('file', imageFile.path));
 
-      // Send request and process response
       var response = await request.send();
       if (response.statusCode == 200) {
         var responseData = jsonDecode(await response.stream.bytesToString());
@@ -80,10 +76,8 @@ class ProfileController {
     }
   }
 
-  // Generate signature for Cloudinary authentication
 // Generate signature for Cloudinary authentication
   String generateSignature(int timestamp, String apiSecret, {String? folder}) {
-    // Create signature string with all parameters
     String signatureString = "";
 
     if (folder != null) {
@@ -99,7 +93,6 @@ class ProfileController {
     return digest.toString();
   }
 
-  // Function to Save Client Information
   Future<void> saveClientInfo({
     required String fullName,
     required String birthDate,
@@ -111,25 +104,20 @@ class ProfileController {
     required BuildContext context,
   }) async {
     try {
-      // Show loading indicator
       String? imageUrl;
 
-      // Upload image to Cloudinary if provided
       if (profileImage != null) {
-        // Show upload indicator or message if needed
         imageUrl = await uploadFileToCloudinary(profileImage, folder: "profile_images");
         if (imageUrl == null) {
           throw "Image upload to Cloudinary failed";
         }
       }
 
-      // Get current user ID
       User? currentUser = _auth.currentUser;
       if (currentUser == null) {
         throw "User not authenticated";
       }
 
-      // Create user data map
       Map<String, dynamic> userData = {
         "id": currentUser.uid,
         "email": currentUser.email,
@@ -139,15 +127,13 @@ class ProfileController {
         "age": age,
         "address": address,
         "phoneNumber": phoneNumber,
-        "profilePicture": imageUrl, // Store Cloudinary image URL
+        "profilePicture": imageUrl,
         "role": "client",
         "createdAt": FieldValue.serverTimestamp(),
       };
 
-      // Save to Firestore
       await _firestore.collection("users").doc(currentUser.uid).set(userData);
 
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Profile created successfully!"),
@@ -155,11 +141,9 @@ class ProfileController {
         ),
       );
 
-      // Navigate to home or dashboard page
       Navigator.pushReplacementNamed(context, '/home');
 
     } catch (e) {
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error: $e"),
@@ -169,8 +153,7 @@ class ProfileController {
     }
   }
 
-  // Updated function to save student information with document upload
-  // Add this method to your ProfileController class
+
   Future<void> saveStudentInfo({
     required String fullName,
     required String birthDate,
@@ -205,7 +188,6 @@ class ProfileController {
       return;
     }
 
-    // Check if student document is provided
     if (studentDocument == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -217,7 +199,6 @@ class ProfileController {
     }
 
     try {
-      // Show loading indicator
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -231,13 +212,11 @@ class ProfileController {
       String? profileImageUrl;
       String? studentDocumentUrl;
 
-      // Upload profile image if provided
       if (profileImage != null) {
         profileImageUrl = await uploadFileToCloudinary(profileImage, folder: "profile_images");
         if (profileImageUrl == null) throw "Profile image upload failed";
       }
 
-      // Upload student document
       studentDocumentUrl = await uploadFileToCloudinary(studentDocument, folder: "student_documents");
       if (studentDocumentUrl == null) throw "Student document upload failed";
 
@@ -246,13 +225,11 @@ class ProfileController {
         throw "User not authenticated";
       }
 
-      // Create services list if a service was selected
       List<String> services = [];
       if (selectedService != null && selectedService.isNotEmpty) {
         services.add(selectedService);
       }
 
-      // Create user data map with all the required and optional fields
       Map<String, dynamic> userData = {
         "id": currentUser.uid,
         "email": currentUser.email,
@@ -275,13 +252,10 @@ class ProfileController {
         "createdAt": FieldValue.serverTimestamp(),
       };
 
-      // Save to Firestore
       await _firestore.collection("users").doc(currentUser.uid).set(userData);
 
-      // Close loading dialog
       Navigator.pop(context);
 
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Profile saved successfully! Your account is pending approval."),
@@ -289,15 +263,12 @@ class ProfileController {
         ),
       );
 
-      // Navigate to home or dashboard page
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
-      // Close loading dialog if it's open
       if (Navigator.canPop(context)) {
         Navigator.pop(context);
       }
 
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error: $e"),

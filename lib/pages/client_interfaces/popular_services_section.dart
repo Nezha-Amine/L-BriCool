@@ -1,4 +1,3 @@
-// popular_services_section.dart
 import 'package:flutter/material.dart';
 
 class ServiceItem {
@@ -18,23 +17,19 @@ class PopularServicesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sample service items
     final List<ServiceItem> services = [
       ServiceItem(
         title: 'Tutoring',
         imagePath: 'assets/images/tutoring.png',
         onTap: () {
-          // Handle tutoring tap
         },
       ),
       ServiceItem(
         title: 'Babysitting',
         imagePath: 'assets/images/babysitting.png',
         onTap: () {
-          // Handle babysitting tap
         },
       ),
-      // Add more services as needed
     ];
 
     return SizedBox(

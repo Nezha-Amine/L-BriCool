@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../../controllers/application_controller.dart';
+import '../../controllers/chat_controller.dart';
 import '../../controllers/gig_controller.dart';
 import '../../models/application_model.dart';
 import '../../models/gig_model.dart';
 
+import '../chat/chat_screen.dart';
+import '../chat/chat_users_screen.dart';
 import '../student_form/success_dialogue.dart';
 import '../student_interfaces/bottom_nav_bar.dart';
 import '../student_interfaces/browse_gigs_screen.dart';
-import '../student_interfaces/chat_screen.dart';
 import '../student_interfaces/history_screen.dart';
 import '../student_interfaces/home_page_gigs.dart';
+import '../student_interfaces/home_top_screen/notification_overlay.dart';
+import '../student_interfaces/home_top_screen/top_screen_content.dart';
 import '../student_interfaces/profile_screen.dart';
 
 class GigDetailPage extends StatefulWidget {
@@ -27,8 +31,11 @@ class _GigDetailPageState extends State<GigDetailPage> {
   final ApplicationController _applicationController = ApplicationController();
   bool isLoading = true;
   GigModel? gig;
-  ApplicationModel? myApplication;  // Add this to track the current user's application
-  int _currentIndex = 1; // For bottom nav bar selection
+  ApplicationModel? myApplication;
+  int _currentIndex = 1;
+  final Animation<double> _fadeAnimation = AlwaysStoppedAnimation(1.0);
+  final NotificationOverlay _notificationOverlay = NotificationOverlay();
+
 
   @override
   void initState() {
@@ -36,22 +43,19 @@ class _GigDetailPageState extends State<GigDetailPage> {
     _loadGigDetails();
   }
 
+
   Future<void> _loadGigDetails() async {
     setState(() {
       isLoading = true;
     });
 
     try {
-      // Load the gig details
       final gigDetails = await _gigController.getGigById(widget.gigId);
 
-      // Check if the user has already applied for this gig
       bool hasApplied = await _applicationController.hasAppliedToGig(widget.gigId);
 
-      // If they've applied, get the application details
       ApplicationModel? applicationDetails;
       if (hasApplied) {
-        // We need to add this method to ApplicationController
         applicationDetails = await _getMyApplicationForGig(widget.gigId);
       }
 
@@ -71,13 +75,10 @@ class _GigDetailPageState extends State<GigDetailPage> {
     }
   }
 
-  // Helper method to get the current user's application for this gig
   Future<ApplicationModel?> _getMyApplicationForGig(String gigId) async {
     try {
-      // Get all applications by the current user
       List<ApplicationModel> myApplications = await _applicationController.getMyApplications();
 
-      // Find the application for this specific gig
       for (var application in myApplications) {
         if (application.gigId == gigId) {
           return application;
@@ -121,7 +122,7 @@ class _GigDetailPageState extends State<GigDetailPage> {
         page = const HistoryScreen();
         break;
       case 3:
-        page = const ChatScreen();
+        page = const ChatUsersScreen();
         break;
       case 4:
         page = const ProfileScreen();
@@ -141,7 +142,6 @@ class _GigDetailPageState extends State<GigDetailPage> {
   }
 
   void _applyForGig(BuildContext context, String gigId) async {
-    // Show loading indicator
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -152,14 +152,11 @@ class _GigDetailPageState extends State<GigDetailPage> {
       },
     );
 
-    // Apply for the gig using the ApplicationController
     bool success = await _applicationController.applyForGig(gigId);
 
-    // Close loading dialog
     Navigator.pop(context);
 
     if (success) {
-      // Show success dialog
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -168,27 +165,23 @@ class _GigDetailPageState extends State<GigDetailPage> {
             message: 'Your application has been sent successfully! You will be notified once the client reviews your application.',
 
             onOkPressed: () {
-              // Close dialog and navigate back to browse gigs
               Navigator.pop(context);
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const BrowseGigsScreen()),
+                MaterialPageRoute(builder: (context) => const HistoryScreen()),
               );
             },
           );
         },
       );
     } else {
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to apply for this gig. You may have already applied or an error occurred.')),
       );
     }
   }
 
-  // New method to cancel an application
   void _cancelApplication(BuildContext context, String applicationId) async {
-    // Show confirmation dialog
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -204,7 +197,6 @@ class _GigDetailPageState extends State<GigDetailPage> {
               onPressed: () async {
                 Navigator.pop(context);
 
-                // Show loading indicator
                 showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -215,19 +207,15 @@ class _GigDetailPageState extends State<GigDetailPage> {
                   },
                 );
 
-                // We need to add this method to ApplicationController
                 bool success = await _applicationController.updateApplicationStatus(applicationId, 'cancelled');
 
-                // Close loading dialog
                 Navigator.pop(context);
 
                 if (success) {
-                  // Show success message
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Your application has been cancelled.')),
                   );
 
-                  // Refresh the page
                   _loadGigDetails();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -243,9 +231,7 @@ class _GigDetailPageState extends State<GigDetailPage> {
     );
   }
 
-  // New method to mark a gig as complete from student side
   void _markGigComplete(BuildContext context, String applicationId) async {
-    // Show confirmation dialog
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -261,7 +247,6 @@ class _GigDetailPageState extends State<GigDetailPage> {
               onPressed: () async {
                 Navigator.pop(context);
 
-                // Show loading indicator
                 showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -272,14 +257,11 @@ class _GigDetailPageState extends State<GigDetailPage> {
                   },
                 );
 
-                // We need to add this method to ApplicationController
                 bool success = await _applicationController.updateApplicationStatus(applicationId, 'completed');
 
-                // Close loading dialog
                 Navigator.pop(context);
 
                 if (success) {
-                  // Show success dialog
                   showDialog(
                     context: context,
                     barrierDismissible: false,
@@ -311,96 +293,85 @@ class _GigDetailPageState extends State<GigDetailPage> {
     );
   }
 
+  void _navigateToChat(BuildContext context) async {
+    final chatController = ChatController();
+
+    try {
+      await chatController.navigateToChat(
+          context: context,
+          recipientId: gig!.clientId,
+          gigId: gig!.id
+      );
+    } catch (e) {
+      print('Error navigating to chat: $e');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     const Color primaryColor = Color(0xFF40189D); // Purple
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: primaryColor))
-          : gig == null
-          ? const Center(child: Text('Gig not found'))
-          : _buildGigDetails(context, primaryColor),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: _currentIndex,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+      backgroundColor: const Color(0xFFF6F6F6),
+      body: Column(
+        children: [
+          HomeTopScreenContent(
+            fadeAnimation: _fadeAnimation,
+            notificationOverlay: _notificationOverlay,
+            greeting: "",
+            name: "Gig Details",
+            showBackButton: true,
+            onBackPressed: () => Navigator.of(context).pop(),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Browse gigs',
+
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator(color: primaryColor))
+                : gig == null
+                ? const Center(child: Text('Gig not found'))
+                : SingleChildScrollView(
+              child: _buildGigDetails(context, primaryColor),
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chat',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+
+          CustomBottomNavigationBar(
+            currentIndex: _currentIndex,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.search),
+                label: 'Browse gigs',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.history),
+                label: 'History',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat),
+                label: 'Chat',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+            ],
+            onItemTapped: (index) {
+              _navigateToPage(index);
+            },
           ),
         ],
-        onItemTapped: (index) {
-          _navigateToPage(index);
-        },
       ),
     );
   }
-
   Widget _buildGigDetails(BuildContext context, Color primaryColor) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Wave at top
-          Stack(
-            children: [
-              // Wave shape
-              ClipPath(
-                clipper: _PurpleWaveClipper(),
-                child: Container(
-                  height: 200,
-                  color: primaryColor,
-                ),
-              ),
-              // Back arrow
-              Positioned(
-                top: 50,
-                left: 16,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-              // Notification + menu icons
-              Positioned(
-                top: 50,
-                right: 16,
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.notifications_none, color: Colors.white),
-                      onPressed: () {
-                        // Handle notifications
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.menu, color: Colors.white),
-                      onPressed: () {
-                        // Open side drawer or menu
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+
 
           // Main content
           Padding(
@@ -535,7 +506,6 @@ class _GigDetailPageState extends State<GigDetailPage> {
                   const SizedBox(height: 8),
                 ],
 
-                // Languages
                 if (gig!.languages.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   const Text(
@@ -612,7 +582,6 @@ class _GigDetailPageState extends State<GigDetailPage> {
     );
   }
 
-  // Helper method to determine the color based on status
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
@@ -630,15 +599,11 @@ class _GigDetailPageState extends State<GigDetailPage> {
     }
   }
 
-  // Helper method to format status text
   String _formatStatus(String status) {
-    // Capitalize first letter
     return status.substring(0, 1).toUpperCase() + status.substring(1);
   }
 
-  // Helper method to build the appropriate action button
   Widget _buildActionButton(BuildContext context, Color primaryColor) {
-    // If no application exists, show Apply button
     if (myApplication == null) {
       return ElevatedButton(
         onPressed: () => _applyForGig(context, gig!.id!),
@@ -656,7 +621,41 @@ class _GigDetailPageState extends State<GigDetailPage> {
       );
     }
 
-    // Show different buttons based on application status
+    if (myApplication != null && myApplication!.status.toLowerCase() == 'accepted') {
+      return Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () => _markGigComplete(context, myApplication!.id!),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: const Text(
+                'MARK AS COMPLETE',
+                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          ElevatedButton(
+            onPressed: () => _navigateToChat(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            ),
+            child: const Icon(Icons.chat, color: Colors.white),
+          ),
+        ],
+      );
+    }
+
     switch (myApplication!.status.toLowerCase()) {
       case 'pending':
         return ElevatedButton(
@@ -678,22 +677,40 @@ class _GigDetailPageState extends State<GigDetailPage> {
         DateTime now = DateTime.now();
         bool canComplete = now.isAfter(gig!.startDate);
 
-        return ElevatedButton(
-          onPressed: canComplete
-              ? () => _markGigComplete(context, myApplication!.id!)
-              : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            disabledBackgroundColor: Colors.green.withOpacity(0.5),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
+        return Row(
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: canComplete
+                    ? () => _markGigComplete(context, myApplication!.id!)
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  disabledBackgroundColor: Colors.green.withOpacity(0.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: Text(
+                  canComplete ? 'MARK AS COMPLETE' : 'ACCEPTED - WAITING FOR GIG DATE',
+                  style: const TextStyle(fontWeight: FontWeight.bold , color: Colors.white),
+                ),
+              ),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-          ),
-          child: Text(
-            canComplete ? 'MARK AS COMPLETE' : 'ACCEPTED - WAITING FOR GIG DATE',
-            style: const TextStyle(fontWeight: FontWeight.bold , color: Colors.white),
-          ),
+            const SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: () => _navigateToChat(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+              child: const Icon(Icons.chat, color: Colors.white),
+            ),
+          ],
         );
 
       case 'rejected':
@@ -729,20 +746,39 @@ class _GigDetailPageState extends State<GigDetailPage> {
         );
 
       case 'completed':
-        return ElevatedButton(
-          onPressed: null, // Disabled
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
+        return Row(
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: null, // Disabled
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text(
+                  'GIG COMPLETED',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-          ),
-          child: const Text(
-            'GIG COMPLETED',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+            const SizedBox(width: 10),
+            ElevatedButton(
+              onPressed: () => _navigateToChat(context), // Always allow chat for completed gigs
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+              child: const Icon(Icons.chat, color: Colors.white),
+            ),
+          ],
         );
+
 
       default:
         return ElevatedButton(
@@ -761,7 +797,6 @@ class _GigDetailPageState extends State<GigDetailPage> {
         );
     }
   }
-
   Widget _buildChildInfoBox(Map<String, String> child) {
     String type = child['type'] ?? 'Child';
     String age = child['age'] ?? '';
@@ -802,7 +837,6 @@ class _PurpleWaveClipper extends CustomClipper<Path> {
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
-// Info chip for tasks, languages, etc.
 class _InfoChip extends StatelessWidget {
   final String label;
 

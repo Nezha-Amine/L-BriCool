@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:lbricool/pages/student_interfaces/home_page_gigs.dart';
 
 import 'bio_page.dart';
 

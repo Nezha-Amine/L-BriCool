@@ -1,16 +1,22 @@
-// student_profile_view.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lbricool/pages/client_interfaces/review_card_widget.dart';
+import '../../controllers/auth_controller.dart';
+import '../../controllers/chat_controller.dart';
+import '../../controllers/application_controller.dart';
+
 import '../../models/user_model.dart';
+import '../chat/chat_screen.dart';
 
 
 class StudentProfileView extends StatefulWidget {
   final String studentId;
+  final String? gigId;
 
   const StudentProfileView({
     Key? key,
     required this.studentId,
+    this.gigId,
   }) : super(key: key);
 
   @override
@@ -20,11 +26,17 @@ class StudentProfileView extends StatefulWidget {
 class _StudentProfileViewState extends State<StudentProfileView> {
   late Future<UserModel?> _studentFuture;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ChatController _chatController = ChatController();
+  final ApplicationController _applicationController = ApplicationController();
+
+  bool _canChat = false;
 
   @override
   void initState() {
     super.initState();
     _loadStudentData();
+    _checkChatPermissions();
+
   }
 
   void _loadStudentData() {
@@ -39,9 +51,26 @@ class _StudentProfileViewState extends State<StudentProfileView> {
       return null;
     });
   }
+  void _checkChatPermissions() async {
+    if (widget.gigId != null) {
+      final application = await _applicationController.getApplicationForGigAndStudent(
+          widget.gigId!,
+          widget.studentId
+      );
 
+      setState(() {
+        _canChat = application != null &&
+            ['accepted', 'completed'].contains(application.status);
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
+    print('Building StudentProfileView');
+    print('Student ID: ${widget.studentId}');
+    print('Gig ID: ${widget.gigId}');
+    print('Current User ID: ${AuthController().getCurrentUserId()}');
+    print('_canChat value: $_canChat');
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
       body: FutureBuilder<UserModel?>(
@@ -106,6 +135,25 @@ class _StudentProfileViewState extends State<StudentProfileView> {
                   ),
                   collapseMode: CollapseMode.pin,
                 ),
+                actions: _canChat
+                    ? [
+                  IconButton(
+                    icon: const Icon(Icons.chat, color: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChatScreen(
+                            currentUser: AuthController().getCurrentUserId()!,
+                            recipientUser: widget.studentId,
+                            gigId: widget.gigId,
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                ]
+                    : null,
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: () => Navigator.pop(context),

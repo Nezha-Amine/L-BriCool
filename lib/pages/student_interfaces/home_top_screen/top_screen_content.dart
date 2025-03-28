@@ -8,6 +8,7 @@ import 'package:lbricool/pages/auth/register.dart';
 
 import '../../../controllers/auth_controller.dart';
 import '../../../models/user_model.dart';
+import '../../auth/login.dart';
 import 'menu_content.dart';
 import 'notification_overlay.dart';
 import 'custom_curved_app_bar.dart';
@@ -162,13 +163,13 @@ class _HomeTopScreenContentState extends State<HomeTopScreenContent> {
                                   size: 28,
                                 ),
                                 onPressed: () {
-                                  widget.notificationOverlay.showNotifications(context);
+                                  widget.notificationOverlay.showNotifications(context, currentUserId: '');
                                 },
                               ),
 
                               // Menu icon
                               MenuContent(
-                                onSelected: (value) {
+                                onSelected: (value) async {
                                   switch (value) {
                                     case 'Profile':
                                       Navigator.push(
@@ -178,10 +179,11 @@ class _HomeTopScreenContentState extends State<HomeTopScreenContent> {
                                       );
                                       break;
                                     case 'Log Out':
-                                      Navigator.push(
+                                      await _authController.logout(); // Call the logout function
+                                      Navigator.pushAndRemoveUntil(
                                         context,
-                                        MaterialPageRoute(
-                                            builder: (context) => const RegisterPage()),
+                                        MaterialPageRoute(builder: (context) =>  LogInPage()), // Navigate to register screen
+                                            (route) => false, // Remove all previous routes
                                       );
                                       break;
                                   }

@@ -5,10 +5,10 @@ class ApplicationModel {
   final String? id;
   final String gigId;
   final String studentId;
-  final String status; // 'pending', 'accepted', 'rejected'
+  final String status;
   final Timestamp appliedAt;
   final Timestamp? updatedAt;
-  final String? studentName; // Optional: for easier display
+  final String? studentName;
 
   ApplicationModel({
     this.id,
@@ -20,7 +20,6 @@ class ApplicationModel {
     this.studentName,
   });
 
-  // Convert to Map for Firestore
   Map<String, dynamic> toMap() {
     return {
       'gigId': gigId,
@@ -32,7 +31,6 @@ class ApplicationModel {
     };
   }
 
-  // Create ApplicationModel from Firestore data
   factory ApplicationModel.fromMap(Map<String, dynamic> map, String id) {
     return ApplicationModel(
       id: id,
@@ -45,7 +43,6 @@ class ApplicationModel {
     );
   }
 
-  // Create a copy with modified fields
   ApplicationModel copyWith({
     String? id,
     String? gigId,

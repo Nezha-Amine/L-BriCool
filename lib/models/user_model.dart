@@ -14,7 +14,6 @@ class UserModel {
   final UserRole? role;
   final String? profilePicture;
 
-  // Student-specific fields
   final String? universityName;
   final String? fieldOfStudy;
   final int? yearOfStudy;
@@ -26,7 +25,6 @@ class UserModel {
   final bool? isApproved;
   final Timestamp? createdAt;
 
-  // Constructor
   UserModel({
     required this.id,
     required this.fullName,
@@ -50,7 +48,6 @@ class UserModel {
     this.createdAt,
   });
 
-  // Convert UserModel to Map (for Firestore)
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -75,9 +72,7 @@ class UserModel {
     };
   }
 
-  // Factory constructor to create a UserModel from a Map (from Firestore)
   factory UserModel.fromMap(Map<String, dynamic> map) {
-    // Parse role
     UserRole parseRole(String roleStr) {
       switch (roleStr.toLowerCase()) {
         case 'client':
@@ -87,7 +82,7 @@ class UserModel {
         case 'admin':
           return UserRole.admin;
         default:
-          return UserRole.client; // Default fallback
+          return UserRole.client;
       }
     }
 
@@ -100,7 +95,7 @@ class UserModel {
       age: map['age'] ?? 0,
       address: map['address'] ?? '',
       phoneNumber: map['phoneNumber'] ?? '',
-      role: map['role'] != null ? parseRole(map['role']) : null, // Handle null role
+      role: map['role'] != null ? parseRole(map['role']) : null,
       profilePicture: map['profilePicture'],
       universityName: map['universityName'],
       fieldOfStudy: map['fieldOfStudy'],
@@ -115,7 +110,6 @@ class UserModel {
     );
   }
 
-  // Create a copy of UserModel with updated fields
   UserModel copyWith({
     String? id,
     String? fullName,

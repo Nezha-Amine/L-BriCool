@@ -28,51 +28,9 @@ class MenuContent extends StatelessWidget {
       onSelected: onSelected,
       itemBuilder: (BuildContext context) {
         return [
-          const PopupMenuItem<String>(
-            value: 'Profile',
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.person,
-                  size: 24,
-                  color: Colors.black,
-                ),
-                SizedBox(width: 8),
-                Text('Profile'),
-              ],
-            ),
-          ),
-          const PopupMenuItem<String>(
-            value: 'My Gigs',
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.work,
-                  size: 24,
-                  color: Colors.black,
-                ),
-                SizedBox(width: 8),
-                Text('My Gigs'),
-              ],
-            ),
-          ),
-          const PopupMenuItem<String>(
-            value: 'Add a Gig',
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.add_box,
-                  size: 24,
-                  color: Colors.black,
-                ),
-                SizedBox(width: 8),
-                Text('Add a Gig'),
-              ],
-            ),
-          ),
+
+
+
           const PopupMenuItem<String>(
             value: 'Log Out',
             child: Row(

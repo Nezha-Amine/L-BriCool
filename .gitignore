@@ -43,7 +43,7 @@ app.*.map.json
 /android/app/release
 
 # Added by Bahae
-android/
+
 build/
 ios/
 .metadata
